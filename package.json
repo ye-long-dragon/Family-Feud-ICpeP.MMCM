@@ -1,0 +1,43 @@
+{
+  "name": "family-feud-icpep.2025-2026",
+  "version": "1.0.0",
+  "description": "A simple web prototype of Family Feud ",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ye-long-dragon/Family-Feud-ICpeP.MMCM.git"
+  },
+  "keywords": [
+    "Family",
+    "Feud",
+    "Game",
+    "Show",
+    "Web",
+    "game",
+    "Web",
+    "Controlled",
+    "Game"
+  ],
+  "author": "Vince Lawrence V. Baraclan",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ye-long-dragon/Family-Feud-ICpeP.MMCM/issues"
+  },
+  "homepage": "https://github.com/ye-long-dragon/Family-Feud-ICpeP.MMCM#readme",
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "dotenv": "^17.2.1",
+    "ejs": "^3.1.10",
+    "express": "^5.1.0",
+    "express-session": "^1.18.2",
+    "mongodb": "^6.19.0",
+    "mongoose": "^8.18.0"
+  }
+}
