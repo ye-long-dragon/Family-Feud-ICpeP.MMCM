@@ -8,92 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
-    <style>
-        body {
-            background-color: #f8f9fa;
-        }
-        .sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100vh;
-            width: 280px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
-            z-index: 1000;
-        }
-        .main-content {
-            margin-left: 280px;
-            padding: 30px;
-            min-height: 100vh;
-        }
-        .user-profile {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .user-avatar {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 3px solid white;
-            margin-bottom: 15px;
-        }
-        .nav-link {
-            color: rgba(255,255,255,0.8) !important;
-            padding: 12px 20px;
-            margin: 5px 0;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
-        .nav-link:hover {
-            color: white !important;
-            background: rgba(255,255,255,0.1);
-            transform: translateX(5px);
-        }
-        .nav-link.active {
-            color: white !important;
-            background: rgba(255,255,255,0.2);
-        }
-        .add-question-btn {
-            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
-            border: none;
-            padding: 12px 25px;
-            border-radius: 8px;
-            font-weight: 600;
-            margin: 20px 0;
-            width: 100%;
-            transition: all 0.3s ease;
-        }
-        .add-question-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-        .logout-btn {
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.3);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 8px;
-            width: 100%;
-            margin-top: auto;
-        }
-        .logout-btn:hover {
-            background: rgba(255,255,255,0.2);
-        }
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 100%;
-                height: auto;
-                position: relative;
-            }
-            .main-content {
-                margin-left: 0;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="/css/dashboard.css">
 </head>
 <body>
     <!-- Sidebar -->
@@ -167,113 +82,23 @@
                 
             </div>
 
-            <!-- Recent Questions -->
-            <div class="row">
-                <div class="col-12">
-                    <div class="card border-0 shadow-sm">
-                        <div class="card-header bg-white">
-                            <h5 class="card-title mb-0">Recent Questions</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="list-group list-group-flush">
-                                <div class="list-group-item border-0">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <h6 class="mb-1">How to implement authentication in React?</h6>
-                                            <small class="text-muted">Posted 2 hours ago</small>
-                                        </div>
-                                        <span class="badge bg-success">Answered</span>
-                                    </div>
-                                </div>
-                                <div class="list-group-item border-0">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <h6 class="mb-1">Best practices for database design</h6>
-                                            <small class="text-muted">Posted 5 hours ago</small>
-                                        </div>
-                                        <span class="badge bg-warning">Pending</span>
-                                    </div>
-                                </div>
-                                <div class="list-group-item border-0">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <h6 class="mb-1">CSS framework comparison: Bootstrap vs Tailwind</h6>
-                                            <small class="text-muted">Posted 1 day ago</small>
-                                        </div>
-                                        <span class="badge bg-success">Answered</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+          
+            <!-- Questions List -->
+            <div id="questionsContainer">
+                <%- include('template/questionList') %>
             </div>
+            
+
         </div>
     </div>
-
+    <%- include('modal/addquestion') %>
     <!-- Bootstrap JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
+    <script src="/js/dashboard.js"></script>
     
-    <script>
-        // Simple JavaScript for interactive elements
-        document.addEventListener('DOMContentLoaded', function() {
-            // Add question button functionality
-            const addQuestionBtn = document.querySelector('.add-question-btn');
-            addQuestionBtn.addEventListener('click', function() {
-                alert('Add Question feature would open a modal or form here!');
-            });
 
-            // Logout button functionality
-            const logoutBtn = document.querySelector('.logout-btn');
-            logoutBtn.addEventListener('click', function() {
-                if(confirm('Are you sure you want to log out?')) {
-                    alert('User logged out successfully!');
-                }
-            });
-
-            // Navigation links
-            const navLinks = document.querySelectorAll('.nav-link');
-            navLinks.forEach(link => {
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    navLinks.forEach(l => l.classList.remove('active'));
-                    this.classList.add('active');
-                });
-            });
-        });
-
-        // Function to handle adding a new question
-        function addNewQuestion() {
-            const questionText = document.getElementById('questionText').value;
-            const answers = Array.from(document.querySelectorAll('.answer-input')).map(input => input.value);
-            const points = Array.from(document.querySelectorAll('.points-input')).map(input => input.value);
-
-            if (questionText && answers.length > 0) {
-                // Here you would typically send the data to your server
-                console.log('New Question:', questionText, 'Answers:', answers, 'Points:', points);
-                alert('Question added successfully!');
-                // Reset the form or close the modal
-                document.getElementById('addQuestionForm').reset();
-            } else {
-                alert('Please fill in all fields.');
-            }
-        }   
-
-        // Submit button event listener
-        document.getElementById('submitQuestionBtn').addEventListener('click', function() {
-            addNewQuestion();
-        });
-
-        // Post Add Question to database
-        document.getElementById('addQuestionForm').addEventListener('submit', function(event) {
-            event.preventDefault(); // Prevent default form submission
-            addNewQuestion(); // Call the function to handle adding a question
-        });
-        
-    </script>
-
-    <%- include('modal/addquestion') %>
+    
 </body>
 </html>
 

@@ -16,6 +16,7 @@ const PORT = process.env.PORT || 3000;
 
 // Serve static files from 'public'
 app.use(express.static('public'));
+app.use(express.json());
 
 app.set('view engine', 'ejs');
 app.set('views', './views'); 
@@ -24,6 +25,7 @@ app.set('views', './views');
 //API Routes
 import questions from './routes/API/questions.js';
 app.use('/api/questions', questions);
+
 
 
 // Mount admin router at /admin
