@@ -21,12 +21,16 @@ app.set('view engine', 'ejs');
 app.set('views', './views'); 
 // if your views folder is named 'views' and is in project root
 
-
+//API Routes
+import questions from './routes/API/questions.js';
+app.use('/api/questions', questions);
 
 
 // Mount admin router at /admin
 app.use('/', admin);
 app.use('/auth', auth);
+
+
 
 
 
