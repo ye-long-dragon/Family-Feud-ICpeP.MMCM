@@ -24,6 +24,7 @@
                 <button type="button" class="btn btn-outline-primary edit-btn" data-id="<%= q._id %>">Edit</button>
                 <button type="button" class="btn btn-outline-secondary up-btn" data-index="<%= index %>" <%= index === 0 ? 'disabled' : '' %>>Up</button>
                 <button type="button" class="btn btn-outline-secondary down-btn" data-index="<%= index %>" <%= index === questions.length - 1 ? 'disabled' : '' %>>Down</button>
+                <button type="button" class="btn btn-outline-danger delete-btn" data-id="<%= q._id %>">Delete</button>
               </div>
             </div>
           </div>

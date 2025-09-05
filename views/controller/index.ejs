@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Family Feud Controller</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+    .answer-box {
+      background-color: white;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      transition: background-color 0.3s;
+    }
+    .answer-box.revealed {
+      background-color: #e1f5fe;
+    }
+    #largeXOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(255,0,0,0.9);
+      color: white;
+      font-size: 20vh;
+      font-weight: bold;
+      text-align: center;
+      justify-content: center;
+      align-items: center;
+      z-index: 1050;
+      display: none;
+    }
+    .question-nav {
+      margin-bottom: 2rem;
+    }
+    .team-section {
+      margin-bottom: 2rem;
+    }
+    .answer-grid {
+      margin-bottom: 2rem;
+    }
+    .controls {
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container my-4">
+
+    <!-- Question Navigation -->
+    <div class="row question-nav align-items-center">
+      <div class="col-auto">
+        <button class="btn btn-secondary btn-lg" id="prevQuestionBtn">Previous Question</button>
+      </div>
+      <div class="col">
+        <h3 class="text-center fw-bold" id="currentQuestion">What is the capital of France?</h3>
+      </div>
+      <div class="col-auto">
+        <button class="btn btn-secondary btn-lg" id="nextQuestionBtn">Next Question</button>
+      </div>
+    </div>
+
+    <!-- Teams Section -->
+    <div class="row team-section align-items-center">
+      <div class="col-md-6 d-flex align-items-center mb-3 mb-md-0 team1">
+        <div class="me-3 fs-3 fw-bold" id="team1Points">0</div>
+        <input type="text" class="form-control form-control-lg" id="team1Name" value="Team 1" placeholder="Team 1 Name">
+      </div>
+      <div class="col-md-6 d-flex align-items-center team2">
+        <div class="me-3 fs-3 fw-bold" id="team2Points">0</div>
+        <input type="text" class="form-control form-control-lg" id="team2Name" value="Team 2" placeholder="Team 2 Name">
+      </div>
+    </div>
+
+    <!-- Answers -->
+    <div class="row answer-grid">
+      <div class="col-md-6">
+        <div class="d-flex align-items-center border rounded p-3 mb-3 answer-box" data-index="0">
+          <div class="fs-4 fw-bold me-3 answer-points" style="width: 50px; text-align: center;"></div>
+          <div class="flex-grow-1 answer-text fs-5">???</div>
+          <button class="btn btn-sm btn-outline-primary ms-3 reveal-btn">Reveal</button>
+        </div>
+        <div class="d-flex align-items-center border rounded p-3 mb-3 answer-box" data-index="1">
+          <div class="fs-4 fw-bold me-3 answer-points" style="width: 50px; text-align: center;"></div>
+          <div class="flex-grow-1 answer-text fs-5">???</div>
+          <button class="btn btn-sm btn-outline-primary ms-3 reveal-btn">Reveal</button>
+        </div>
+        <div class="d-flex align-items-center border rounded p-3 mb-3 answer-box" data-index="2">
+          <div class="fs-4 fw-bold me-3 answer-points" style="width: 50px; text-align: center;"></div>
+          <div class="flex-grow-1 answer-text fs-5">???</div>
+          <button class="btn btn-sm btn-outline-primary ms-3 reveal-btn">Reveal</button>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="d-flex align-items-center border rounded p-3 mb-3 answer-box" data-index="3">
+          <div class="fs-4 fw-bold me-3 answer-points" style="width: 50px; text-align: center;"></div>
+          <div class="flex-grow-1 answer-text fs-5">???</div>
+          <button class="btn btn-sm btn-outline-primary ms-3 reveal-btn">Reveal</button>
+        </div>
+        <div class="d-flex align-items-center border rounded p-3 mb-3 answer-box" data-index="4">
+          <div class="fs-4 fw-bold me-3 answer-points" style="width: 50px; text-align: center;"></div>
+          <div class="flex-grow-1 answer-text fs-5">???</div>
+          <button class="btn btn-sm btn-outline-primary ms-3 reveal-btn">Reveal</button>
+        </div>
+        <div class="d-flex align-items-center border rounded p-3 mb-3 answer-box" data-index="5">
+          <div class="fs-4 fw-bold me-3 answer-points" style="width: 50px; text-align: center;"></div>
+          <div class="flex-grow-1 answer-text fs-5">???</div>
+          <button class="btn btn-sm btn-outline-primary ms-3 reveal-btn">Reveal</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Point Allocation -->
+    <div class="row mb-4 justify-content-center align-items-center">
+      <div class="col-auto">
+        <label for="pointsToAdd" class="form-label fw-bold">Points to Add:</label>
+      </div>
+      <div class="col-auto">
+        <input type="number" id="pointsToAdd" class="form-control" style="width: 100px;" min="1" value="1">
+      </div>
+      <div class="col-auto">
+        <button class="btn btn-success" id="addPointsTeam1">Add to Team 1</button>
+      </div>
+      <div class="col-auto">
+        <button class="btn btn-success" id="addPointsTeam2">Add to Team 2</button>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="row controls justify-content-center gap-3">
+      <div class="col-auto">
+        <button class="btn btn-danger btn-lg" id="wrongXBtn" title="Show Wrong X">X</button>
+      </div>
+      <div class="col-auto">
+        <button class="btn btn-primary btn-lg" id="revealAllBtn">Reveal All</button>
+      </div>
+      <div class="col-auto">
+        <button class="btn btn-secondary btn-lg" id="hideAllBtn">Hide All</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Large X overlay -->
+  
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // Sample data (replace with real data from your server)
+    const sampleAnswers = [
+      { text: 'Paris', points: 45, revealed: false },
+      { text: 'London', points: 25, revealed: false },
+      { text: 'Berlin', points: 15, revealed: false },
+      { text: 'Madrid', points: 10, revealed: false },
+      { text: 'Rome', points: 5, revealed: false },
+      { text: 'Vienna', points: 0, revealed: false }
+    ];
+
+    // Load initial answers
+    function loadAnswers() {
+      const answerBoxes = document.querySelectorAll('.answer-box');
+      answerBoxes.forEach((box, index) => {
+        const answerText = box.querySelector('.answer-text');
+        const answerPoints = box.querySelector('.answer-points');
+        if (sampleAnswers[index]) {
+          answerText.textContent = sampleAnswers[index].revealed ? sampleAnswers[index].text : '???';
+          answerPoints.textContent = sampleAnswers[index].revealed ? sampleAnswers[index].points : '';
+        }
+      });
+    }
+
+    // Event listeners
+    document.addEventListener('DOMContentLoaded', () => {
+      loadAnswers();
+
+      // Reveal individual answer
+      document.querySelectorAll('.reveal-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const box = e.target.closest('.answer-box');
+          const index = parseInt(box.dataset.index);
+          const answer = sampleAnswers[index];
+          if (answer) {
+            answer.revealed = true;
+            box.querySelector('.answer-text').textContent = answer.text;
+            box.querySelector('.answer-points').textContent = answer.points;
+            box.classList.add('revealed');
+            e.target.style.display = 'none';
+          }
+        });
+      });
+
+      // Reveal all answers
+      document.getElementById('revealAllBtn').addEventListener('click', () => {
+        sampleAnswers.forEach((answer, index) => {
+          answer.revealed = true;
+        });
+        loadAnswers();
+        document.querySelectorAll('.reveal-btn').forEach(btn => btn.style.display = 'none');
+        document.querySelectorAll('.answer-box').forEach(box => box.classList.add('revealed'));
+      });
+
+      // Hide all answers
+      document.getElementById('hideAllBtn').addEventListener('click', () => {
+        sampleAnswers.forEach((answer, index) => {
+          answer.revealed = false;
+        });
+        loadAnswers();
+        document.querySelectorAll('.reveal-btn').forEach(btn => btn.style.display = 'inline');
+        document.querySelectorAll('.answer-box').forEach(box => box.classList.remove('revealed'));
+      });
+
+      // Show large X
+      document.getElementById('wrongXBtn').addEventListener('click', () => {
+        const overlay = document.getElementById('largeXOverlay');
+        overlay.style.display = 'flex';
+        setTimeout(() => {
+          overlay.style.display = 'none';
+        }, 3000); // Hide after 3 seconds
+      });
+
+      // Add points to team 1
+      document.getElementById('addPointsTeam1').addEventListener('click', () => {
+        const points = parseInt(document.getElementById('pointsToAdd').value) || 0;
+        const team1Points = document.getElementById('team1Points');
+        team1Points.textContent = parseInt(team1Points.textContent) + points;
+      });
+
+      // Add points to team 2
+      document.getElementById('addPointsTeam2').addEventListener('click', () => {
+        const points = parseInt(document.getElementById('pointsToAdd').value) || 0;
+        const team2Points = document.getElementById('team2Points');
+        team2Points.textContent = parseInt(team2Points.textContent) + points;
+      });
+
+      // Update team names (placeholder)
+      document.getElementById('team1Name').addEventListener('input', (e) => {
+        // You can update dynamically if needed
+      });
+
+      // Previous / Next Question (placeholder)
+      document.getElementById('prevQuestionBtn').addEventListener('click', () => {
+        alert('Previous Question');
+        // Navigate to previous question
+      });
+
+      document.getElementById('nextQuestionBtn').addEventListener('click', () => {
+        alert('Next Question');
+        // Navigate to next question
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,10 +1,18 @@
 import express from 'express';
 import dotenv from 'dotenv';
+import http from 'http';
+import { Server } from 'socket.io';
 
 // Importing Routes
-import admin from './routes/Pages/admin.js';
+
 import connect from './database/mongo-dbconnect.js';
+
+//Pages routes
 import auth from './routes/Pages/auth.js';
+import admin from './routes/Pages/admin.js';
+import controller from './routes/Pages/controller.js';
+import gamescreen from './routes/Pages/gamescreen.js';
+import registerSocketHandlers from './routes/API/socket.js';
 
 //database connection
 connect();
@@ -13,6 +21,10 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const server = http.createServer(app);
+
+// Attach Socket.IO to HTTP server
+const io = new Server(server);
 
 // Serve static files from 'public'
 app.use(express.static('public'));
@@ -26,11 +38,14 @@ app.set('views', './views');
 import questions from './routes/API/questions.js';
 app.use('/api/questions', questions);
 
-
+registerSocketHandlers(io);
 
 // Mount admin router at /admin
 app.use('/', admin);
 app.use('/auth', auth);
+app.use('/', controller);
+app.use('/', gamescreen);
+
 
 
 

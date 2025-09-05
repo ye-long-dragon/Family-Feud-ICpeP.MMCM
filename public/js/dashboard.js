@@ -174,3 +174,17 @@ function attachButtonHandlers() {
 
 // Load questions on page load
 document.addEventListener('DOMContentLoaded', loadQuestions);
+
+
+document.getElementById('startGameBtn').addEventListener('click', () => {
+  // URLs for your game screen and controller pages
+  // Adjust these URLs to your actual routes or files
+  const gameScreenUrl = '/gamescreen';      // e.g. route serving the game screen
+  const controllerUrl = '/controller';  // e.g. route serving the controller
+
+  // Open both game screen and controller in new windows
+  window.open(gameScreenUrl, 'Game Screen', 'width=800,height=600');
+  window.open(controllerUrl, 'Controller', 'width=400,height=600');
+
+  
+});
