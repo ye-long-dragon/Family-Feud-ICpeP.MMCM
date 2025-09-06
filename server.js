@@ -1,7 +1,8 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import http from 'http';
-import { Server } from 'socket.io';
+import { initSocket } from './routes/API/socket.js';
+import registerSocketHandlers from './routes/API/sockethandlers.js';
 
 // Importing Routes
 
@@ -12,7 +13,7 @@ import auth from './routes/Pages/auth.js';
 import admin from './routes/Pages/admin.js';
 import controller from './routes/Pages/controller.js';
 import gamescreen from './routes/Pages/gamescreen.js';
-import registerSocketHandlers from './routes/API/socket.js';
+import sockethandlers from './routes/API/sockethandlers.js';
 
 //database connection
 connect();
@@ -24,7 +25,13 @@ const PORT = process.env.PORT || 3000;
 const server = http.createServer(app);
 
 // Attach Socket.IO to HTTP server
-const io = new Server(server);
+const io = initSocket(server);
+
+registerSocketHandlers(io);
+
+// Middleware
+
+
 
 // Serve static files from 'public'
 app.use(express.static('public'));
@@ -44,7 +51,7 @@ registerSocketHandlers(io);
 app.use('/', admin);
 app.use('/auth', auth);
 app.use('/', controller);
-app.use('/', gamescreen);
+app.use('/', gamescreen); 
 
 
 

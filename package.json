@@ -41,6 +41,7 @@
     "http": "^0.0.1-security",
     "mongodb": "^6.19.0",
     "mongoose": "^8.18.0",
+    "node-fetch": "^3.3.2",
     "socket.io": "^4.8.1"
   }
 }

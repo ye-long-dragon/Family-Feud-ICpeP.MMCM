@@ -182,9 +182,24 @@ document.getElementById('startGameBtn').addEventListener('click', () => {
   const gameScreenUrl = '/gamescreen';      // e.g. route serving the game screen
   const controllerUrl = '/controller';  // e.g. route serving the controller
 
-  // Open both game screen and controller in new windows
-  window.open(gameScreenUrl, 'Game Screen', 'width=800,height=600');
-  window.open(controllerUrl, 'Controller', 'width=400,height=600');
+  //open windows with game screen and controller with questions variable attached
+  window.open(gameScreenUrl, 'GameScreen', 'width=800,height=600');
+  window.open(controllerUrl, 'Controller', 'width=800,height=600');
+  alert('Game started! Game screen and controller are now open.');
+
+  // Optionally, you can redirect to a specific page or perform other actions
+  // window.location.href = '/some-other-page';
+  // Or you can close the current window if needed
+  // window.close();
+  // Note: Ensure that your server is set up to handle these routes correctly
+  // and that the game screen and controller pages are designed to work with the questions data.
+  // For example, you might want to pass the questions data to these pages
+  // via a global variable, local storage, or by rendering them server-side.
+  // This is a simple example; you can enhance it further based on your requirements.
+  // For example, you might want to pass the questions data to these pages
+  // via a global variable, local storage, or by rendering them server-side.
+
+
 
   
 });

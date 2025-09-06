@@ -46,11 +46,18 @@
     .controls {
       margin-bottom: 2rem;
     }
+
+    .answer-box.revealed {
+  background-color: #d4edda;
+}
   </style>
 </head>
 <body>
 
   <div class="container my-4">
+
+      <!-- Question count display -->
+    <div class="text-center mb-3" id="currentQuestionIndex"></div>
 
     <!-- Question Navigation -->
     <div class="row question-nav align-items-center">
@@ -64,6 +71,9 @@
         <button class="btn btn-secondary btn-lg" id="nextQuestionBtn">Next Question</button>
       </div>
     </div>
+
+
+    
 
     <!-- Teams Section -->
     <div class="row team-section align-items-center">
@@ -151,110 +161,7 @@
 
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-  <script>
-    // Sample data (replace with real data from your server)
-    const sampleAnswers = [
-      { text: 'Paris', points: 45, revealed: false },
-      { text: 'London', points: 25, revealed: false },
-      { text: 'Berlin', points: 15, revealed: false },
-      { text: 'Madrid', points: 10, revealed: false },
-      { text: 'Rome', points: 5, revealed: false },
-      { text: 'Vienna', points: 0, revealed: false }
-    ];
-
-    // Load initial answers
-    function loadAnswers() {
-      const answerBoxes = document.querySelectorAll('.answer-box');
-      answerBoxes.forEach((box, index) => {
-        const answerText = box.querySelector('.answer-text');
-        const answerPoints = box.querySelector('.answer-points');
-        if (sampleAnswers[index]) {
-          answerText.textContent = sampleAnswers[index].revealed ? sampleAnswers[index].text : '???';
-          answerPoints.textContent = sampleAnswers[index].revealed ? sampleAnswers[index].points : '';
-        }
-      });
-    }
-
-    // Event listeners
-    document.addEventListener('DOMContentLoaded', () => {
-      loadAnswers();
-
-      // Reveal individual answer
-      document.querySelectorAll('.reveal-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          const box = e.target.closest('.answer-box');
-          const index = parseInt(box.dataset.index);
-          const answer = sampleAnswers[index];
-          if (answer) {
-            answer.revealed = true;
-            box.querySelector('.answer-text').textContent = answer.text;
-            box.querySelector('.answer-points').textContent = answer.points;
-            box.classList.add('revealed');
-            e.target.style.display = 'none';
-          }
-        });
-      });
-
-      // Reveal all answers
-      document.getElementById('revealAllBtn').addEventListener('click', () => {
-        sampleAnswers.forEach((answer, index) => {
-          answer.revealed = true;
-        });
-        loadAnswers();
-        document.querySelectorAll('.reveal-btn').forEach(btn => btn.style.display = 'none');
-        document.querySelectorAll('.answer-box').forEach(box => box.classList.add('revealed'));
-      });
-
-      // Hide all answers
-      document.getElementById('hideAllBtn').addEventListener('click', () => {
-        sampleAnswers.forEach((answer, index) => {
-          answer.revealed = false;
-        });
-        loadAnswers();
-        document.querySelectorAll('.reveal-btn').forEach(btn => btn.style.display = 'inline');
-        document.querySelectorAll('.answer-box').forEach(box => box.classList.remove('revealed'));
-      });
-
-      // Show large X
-      document.getElementById('wrongXBtn').addEventListener('click', () => {
-        const overlay = document.getElementById('largeXOverlay');
-        overlay.style.display = 'flex';
-        setTimeout(() => {
-          overlay.style.display = 'none';
-        }, 3000); // Hide after 3 seconds
-      });
-
-      // Add points to team 1
-      document.getElementById('addPointsTeam1').addEventListener('click', () => {
-        const points = parseInt(document.getElementById('pointsToAdd').value) || 0;
-        const team1Points = document.getElementById('team1Points');
-        team1Points.textContent = parseInt(team1Points.textContent) + points;
-      });
-
-      // Add points to team 2
-      document.getElementById('addPointsTeam2').addEventListener('click', () => {
-        const points = parseInt(document.getElementById('pointsToAdd').value) || 0;
-        const team2Points = document.getElementById('team2Points');
-        team2Points.textContent = parseInt(team2Points.textContent) + points;
-      });
-
-      // Update team names (placeholder)
-      document.getElementById('team1Name').addEventListener('input', (e) => {
-        // You can update dynamically if needed
-      });
-
-      // Previous / Next Question (placeholder)
-      document.getElementById('prevQuestionBtn').addEventListener('click', () => {
-        alert('Previous Question');
-        // Navigate to previous question
-      });
-
-      document.getElementById('nextQuestionBtn').addEventListener('click', () => {
-        alert('Next Question');
-        // Navigate to next question
-      });
-    });
-  </script>
+  <script src="/js/controller.js"></script>
+ 
 </body>
 </html>
