@@ -1,139 +1,156 @@
-import io from 'socket.io-client';
-const socket = io();
+let questions = [];
+let currentQuestionIndex = 0;
 
-const currentQuestionElem = document.getElementById('currentQuestion');
-const currentQuestionIndexElem = document.getElementById('currentQuestionIndex');
-const team1PointsElem = document.getElementById('team1Points');
-const team2PointsElem = document.getElementById('team2Points');
-const team1NameInput = document.getElementById('team1Name');
-const team2NameInput = document.getElementById('team2Name');
-const pointsToAddInput = document.getElementById('pointsToAdd');
-const wrongXBtn = document.getElementById('wrongXBtn');
-const revealAllBtn = document.getElementById('revealAllBtn');
-const hideAllBtn = document.getElementById('hideAllBtn');
-const nextQuestionBtn = document.getElementById('nextQuestionBtn');
-const prevQuestionBtn = document.getElementById('prevQuestionBtn');
 
-const answerBoxes = Array.from(document.querySelectorAll('.answer-box'));
-
-let gameState = null;
-
-// Render the game state received from the server
-function renderGameState(state) {
-  gameState = state;
-
-  currentQuestionElem.textContent = state.question || '';
-  currentQuestionIndexElem.textContent = `Question ${state.currentQuestionIndex + 1}`;
-
-  // Update answers
-  state.answers.forEach((answer, i) => {
-    const box = answerBoxes[i];
-    if (!box) return;
-
-    const pointsElem = box.querySelector('.answer-points');
-    const textElem = box.querySelector('.answer-text');
-    const revealBtn = box.querySelector('.reveal-btn');
-
-    pointsElem.textContent = answer.revealed ? answer.points : '';
-    textElem.textContent = answer.revealed ? answer.answer : '???';
-
-    if (answer.revealed) {
-      box.classList.add('revealed');
-    } else {
-      box.classList.remove('revealed');
-    }
-
-    // Enable reveal button only if not revealed
-    revealBtn.disabled = answer.revealed;
-  });
-
-  // Update team points and names
-  team1PointsElem.textContent = state.teams.team1.points;
-  team2PointsElem.textContent = state.teams.team2.points;
-  if (team1NameInput.value !== state.teams.team1.name) {
-    team1NameInput.value = state.teams.team1.name;
-  }
-  if (team2NameInput.value !== state.teams.team2.name) {
-    team2NameInput.value = state.teams.team2.name;
-  }
-}
-
-// Listen for gameState updates from server
-socket.on('gameState', (state) => {
-  renderGameState(state);
-});
-
-// Reveal a single answer by index
-function revealAnswer(index) {
-  socket.emit('revealAnswer', index);
-}
-
-// Add points to a team
-function addPoints(team) {
-  const points = parseInt(pointsToAddInput.value, 10);
-  if (isNaN(points) || points <= 0) {
-    alert('Please enter a valid positive number of points.');
+function displayQuestion(index) {
+  if (index < 0 || index >= questions.length) {
+    console.error('Invalid question index:', index);
     return;
   }
-  socket.emit('updatePoints', { team, points });
+  const question = questions[index];
+  document.getElementById('currentQuestion').textContent = question.question;
+
+  const answerBoxes = document.querySelectorAll('.answer-box');
+  answerBoxes.forEach((box, i) => {
+    const answerText = box.querySelector('.answer-text');
+    const answerPoints = box.querySelector('.answer-points');
+    const revealBtn = box.querySelector('.reveal-btn');
+    const answer = question.answers[i];
+
+    if (answer) {
+      // Initialize revealed if missing
+      if (answer.revealed === undefined) answer.revealed = false;
+
+      // Always show answer text
+      answerText.textContent = answer.answer;
+
+      // Show points only if revealed
+      answerPoints.textContent = answer.revealed ? answer.points : '';
+
+      // Toggle revealed class and reveal button visibility
+      if (answer.revealed) {
+        box.classList.add('revealed');
+        revealBtn.style.display = 'none';
+      } else {
+        box.classList.remove('revealed');
+        revealBtn.style.display = 'inline-block';
+      }
+    } else {
+      answerText.textContent = '';
+      answerPoints.textContent = '';
+      box.classList.remove('revealed');
+      revealBtn.style.display = 'none';
+    }
+  });
+
+  currentQuestionIndex = index;
+  document.getElementById('currentQuestionIndex').textContent = `Question ${index + 1} of ${questions.length}`;
 }
 
-// Update team name
-function updateTeamName(team, name) {
-  socket.emit('updateTeamName', { team, name });
+
+
+
+
+
+
+function revealAnswer(index) {
+  const question = questions[currentQuestionIndex];
+  if (question.answers && question.answers[index]) {
+    question.answers[index].revealed = true;
+    displayQuestion(currentQuestionIndex);
+  }
 }
 
-// Reveal all answers
-function revealAll() {
-  socket.emit('revealAll');
+function revealAllAnswers() {
+  const question = questions[currentQuestionIndex];
+  question.answers.forEach(answer => answer.revealed = true);
+  displayQuestion(currentQuestionIndex);
 }
 
-// Hide all answers
-function hideAll() {
-  socket.emit('hideAll');
+function hideAllAnswers() {
+  const question = questions[currentQuestionIndex];
+  question.answers.forEach(answer => answer.revealed = false);
+  displayQuestion(currentQuestionIndex);
 }
 
-// Show wrong X overlay
-function showWrongX() {
-  socket.emit('showWrongX');
-}
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const response = await fetch('/api/questions');
+    if (!response.ok) throw new Error('Failed to fetch questions');
+    questions = await response.json();
 
-// Navigation
-function nextQuestion() {
-  socket.emit('nextQuestion');
-}
+    if (questions.length === 0) {
+      alert('No questions found');
+      return;
+    }
 
-function prevQuestion() {
-  socket.emit('prevQuestion');
-}
+    displayQuestion(0);
 
-// Setup event listeners
-answerBoxes.forEach(box => {
-  const index = parseInt(box.getAttribute('data-index'), 10);
-  const revealBtn = box.querySelector('.reveal-btn');
-  revealBtn.addEventListener('click', () => revealAnswer(index));
-});
+    // Add event listeners to reveal buttons inside answer boxes
+    document.querySelectorAll('.answer-box').forEach((box, index) => {
+      const btn = box.querySelector('.reveal-btn');
+      btn.addEventListener('click', () => revealAnswer(index));
+    });
 
-team1NameInput.addEventListener('input', (e) => {
-  updateTeamName('team1', e.target.value);
-});
+    // Navigation buttons
+    document.getElementById('nextQuestionBtn').addEventListener('click', () => {
+      if (currentQuestionIndex < questions.length - 1) {
+        displayQuestion(currentQuestionIndex + 1);
+      } else {
+        alert('No more questions available.');
+      }
+    });
 
-team2NameInput.addEventListener('input', (e) => {
-  updateTeamName('team2', e.target.value);
-});
+    document.getElementById('prevQuestionBtn').addEventListener('click', () => {
+      if (currentQuestionIndex > 0) {
+        displayQuestion(currentQuestionIndex - 1);
+      } else {
+        alert('This is the first question.');
+      }
+    });
 
-document.getElementById('addPointsTeam1').addEventListener('click', () => addPoints('team1'));
-document.getElementById('addPointsTeam2').addEventListener('click', () => addPoints('team2'));
+    // Reveal all / Hide all buttons
+    document.getElementById('revealAllBtn').addEventListener('click', revealAllAnswers);
+    document.getElementById('hideAllBtn').addEventListener('click', hideAllAnswers);
 
-revealAllBtn.addEventListener('click', revealAll);
-hideAllBtn.addEventListener('click', hideAll);
-wrongXBtn.addEventListener('click', showWrongX);
-nextQuestionBtn.addEventListener('click', nextQuestion);
-prevQuestionBtn.addEventListener('click', prevQuestion);
+    // Wrong X button (example)
+    document.getElementById('wrongXBtn').addEventListener('click', () => {
+      const overlay = document.createElement('div');
+      overlay.id = 'largeXOverlay';
+      overlay.style.position = 'fixed';
+      overlay.style.top = 0;
+      overlay.style.left = 0;
+      overlay.style.width = '100vw';
+      overlay.style.height = '100vh';
+      overlay.style.backgroundColor = 'rgba(255,0,0,0.9)';
+      overlay.style.color = 'white';
+      overlay.style.fontSize = '20vh';
+      overlay.style.fontWeight = 'bold';
+      overlay.style.display = 'flex';
+      overlay.style.justifyContent = 'center';
+      overlay.style.alignItems = 'center';
+      overlay.style.zIndex = 1050;
+      overlay.textContent = 'X';
+      document.body.appendChild(overlay);
+      setTimeout(() => {
+        document.body.removeChild(overlay);
+      }, 3000);
+    });
 
-// Optional: listen for showWrongX event to show overlay on controller if needed
-socket.on('showWrongX', () => {
-  // You can implement a visual overlay here if desired
-  // For example, flash the screen red or show a modal
-  console.log('Wrong X shown');
+    // Points buttons
+    document.getElementById('addPointsTeam1').addEventListener('click', () => {
+      const pointsToAdd = parseInt(document.getElementById('pointsToAdd').value) || 0;
+      const team1Points = document.getElementById('team1Points');
+      team1Points.textContent = (parseInt(team1Points.textContent) || 0) + pointsToAdd;
+    });
+
+    document.getElementById('addPointsTeam2').addEventListener('click', () => {
+      const pointsToAdd = parseInt(document.getElementById('pointsToAdd').value) || 0;
+      const team2Points = document.getElementById('team2Points');
+      team2Points.textContent = (parseInt(team2Points.textContent) || 0) + pointsToAdd;
+    });
+
+  } catch (error) {
+    console.error('Error loading questions:', error);
+  }
 });
