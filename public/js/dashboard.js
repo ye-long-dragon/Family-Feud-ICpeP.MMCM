@@ -183,8 +183,9 @@ document.getElementById('startGameBtn').addEventListener('click', () => {
   const controllerUrl = '/controller';  // e.g. route serving the controller
 
   //open windows with game screen and controller with questions variable attached
-  window.open(gameScreenUrl, 'GameScreen', 'width=800,height=600');
   window.open(controllerUrl, 'Controller', 'width=800,height=600');
+  window.open(gameScreenUrl, 'GameScreen', 'width=800,height=600');
+  
   alert('Game started! Game screen and controller are now open.');
 
   // Optionally, you can redirect to a specific page or perform other actions

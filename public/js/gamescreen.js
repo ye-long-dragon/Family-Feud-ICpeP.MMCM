@@ -29,13 +29,16 @@ function updateUI() {
     if (!answerBox) continue;
 
     const answer = currentQuestion?.answers[i];
-    if (answer) {
+    if (answer && answer.revealed) {
       answerBox.textContent = `${answer.answer} - ${answer.points}`;
       answerBox.classList.add('revealed');
+      answerBox.classList.remove('hidden');
     } else {
-      answerBox.textContent = '';
+      answerBox.textContent = '';  // Hide answer text if not revealed
       answerBox.classList.remove('revealed');
+      answerBox.classList.add('hidden');
     }
   }
 }
+
 
