@@ -19,6 +19,7 @@ socket.on('gameState', (state) => {
 
   // Display current question and answers
   displayQuestion(currentQuestionIndex);
+  
 });
 
 let questions = [];
