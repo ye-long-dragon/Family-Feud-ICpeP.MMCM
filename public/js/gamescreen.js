@@ -1,91 +1,76 @@
-import io from 'socket.io-client';
-const socket = io();
+const socket = io("http://localhost:4000"); // adjust port if needed
 
-const questionElem = document.getElementById('question');
-const answerBoxes = [
-  document.getElementById('answer-0'),
-  document.getElementById('answer-1'),
-  document.getElementById('answer-2'),
-  document.getElementById('answer-3'),
-  document.getElementById('answer-4'),
-  document.getElementById('answer-5'),
-];
-const teamAPointsElem = document.getElementById('team-a-points');
-const teamBPointsElem = document.getElementById('team-b-points');
-const wrongOverlay = document.getElementById('wrong-overlay');
+// Track last state to detect new reveals
+let lastRevealedCount = 0;
 
-let gameState = null;
-
-// Render the game state received from the server
+// 🔹 Update the game state UI
 function renderGameState(state) {
-  gameState = state;
+  console.log("✅ Rendering game state:", state);
 
-  questionElem.textContent = state.question || '';
+  const { teams, question, answers } = state;
 
-  state.answers.forEach((answer, i) => {
-    const box = answerBoxes[i];
-    if (!box) return;
-    if (answer.revealed) {
-      box.textContent = `${answer.answer} - ${answer.points}`;
-      box.classList.add('revealed');
+  // Update team names
+  document.getElementById("team1-name").textContent = teams.team1.name;
+  document.getElementById("team2-name").textContent = teams.team2.name;
+
+  // Update team points
+  document.getElementById("team-a-points").textContent = teams.team1.points;
+  document.getElementById("team-b-points").textContent = teams.team2.points;
+
+  // Update question
+  document.getElementById("question").textContent = question || "Waiting for question...";
+
+  // Count revealed answers to detect new ones
+  let revealedCount = 0;
+
+  // Update answers (supports up to 6)
+  for (let i = 0; i < 6; i++) {
+    const answerObj = answers[i];
+    const answerElem = document.getElementById(`answer-${i}`);
+    if (!answerElem) continue;
+
+    if (answerObj) {
+      if (answerObj.revealed) {
+        answerElem.textContent = `${answerObj.answer} - ${answerObj.points}`;
+        answerElem.classList.add("revealed");
+        revealedCount++;
+      } else {
+        answerElem.textContent = "???";
+        answerElem.classList.remove("revealed");
+      }
     } else {
-      box.textContent = '';
-      box.classList.remove('revealed');
+      answerElem.textContent = "";
+      answerElem.classList.remove("revealed");
     }
-  });
+  }
 
-  teamAPointsElem.textContent = state.teams.team1.points;
-  teamBPointsElem.textContent = state.teams.team2.points;
+  // 🔔 Play ding if a new answer was revealed
+  if (revealedCount > lastRevealedCount) {
+    dingSound.currentTime = 0;
+    dingSound.play().catch(err => console.warn("Ding sound blocked:", err));
+  }
+  lastRevealedCount = revealedCount;
 }
 
-// Listen for gameState updates from server
-socket.on('gameState', (state) => {
+// 🔹 Listen for full game state updates
+socket.on("gameState", (state) => {
   renderGameState(state);
 });
 
-// Reveal next unrevealed answer and award points to selected team
-function revealNext() {
-  if (!gameState) return;
+// 🔹 Wrong answer buzz
+socket.on("showWrongX", () => {
+  const overlay = document.getElementById("wrong-overlay");
+  overlay.classList.add("active");
 
-  const nextIndex = gameState.answers.findIndex(a => !a.revealed);
-  if (nextIndex === -1) return; // all revealed
+  buzzSound.currentTime = 0;
+  buzzSound.play().catch(err => console.warn("Buzz sound blocked:", err));
 
-  // Emit revealAnswer event to server
-  socket.emit('revealAnswer', nextIndex);
-
-  // Award points to selected team
-  const team = parseInt(document.getElementById('team-select')?.value, 10);
-  if (team === 1) {
-    socket.emit('updatePoints', { team: 'team1', points: gameState.answers[nextIndex].points });
-  } else if (team === 2) {
-    socket.emit('updatePoints', { team: 'team2', points: gameState.answers[nextIndex].points });
-  }
-}
-
-// Show red X overlay for wrong answer
-function showWrongOverlay() {
-  wrongOverlay.classList.add('active');
   setTimeout(() => {
-    wrongOverlay.classList.remove('active');
+    overlay.classList.remove("active");
   }, 2000);
-  // Notify server to broadcast wrong answer event
-  socket.emit('showWrongX');
-}
-
-// Event listeners
-document.getElementById('reveal-btn').addEventListener('click', revealNext);
-document.getElementById('wrong-btn').addEventListener('click', showWrongOverlay);
-document.addEventListener('keydown', (e) => {
-  if (e.code === 'Space') {
-    e.preventDefault();
-    revealNext();
-  }
 });
 
-// Listen for showWrongX event from server to show overlay on all clients
-socket.on('showWrongX', () => {
-  wrongOverlay.classList.add('active');
-  setTimeout(() => {
-    wrongOverlay.classList.remove('active');
-  }, 2000);
+// 🔹 Debug: confirm when game screen is ready
+document.addEventListener("DOMContentLoaded", () => {
+  console.log("📺 Game screen ready, waiting for server updates...");
 });

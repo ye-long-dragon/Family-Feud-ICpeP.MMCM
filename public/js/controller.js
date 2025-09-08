@@ -1,6 +1,38 @@
+
+
+
+
+// Connect to socket server
+const socket = io(`http://localhost:4000`);
+
+
+
+// Listen for full game state updates from server
+socket.on('gameState', (state) => {
+  // Update local state from server
+  questions = state.questions || questions;
+  currentQuestionIndex = state.currentQuestionIndex ?? currentQuestionIndex;
+
+  // Update points display
+  document.getElementById('team1Points').textContent = state.team1Points ?? document.getElementById('team1Points').textContent;
+  document.getElementById('team2Points').textContent = state.team2Points ?? document.getElementById('team2Points').textContent;
+
+  // Display current question and answers
+  displayQuestion(currentQuestionIndex);
+});
+
 let questions = [];
 let currentQuestionIndex = 0;
 
+function emitGameState() {
+  const currentQuestion = questions[currentQuestionIndex];
+  socket.emit('gameState', {
+    questions,
+    currentQuestionIndex,
+    team1Points: parseInt(document.getElementById('team1Points').textContent) || 0,
+    team2Points: parseInt(document.getElementById('team2Points').textContent) || 0,
+  });
+}
 
 function displayQuestion(index) {
   if (index < 0 || index >= questions.length) {
@@ -18,16 +50,11 @@ function displayQuestion(index) {
     const answer = question.answers[i];
 
     if (answer) {
-      // Initialize revealed if missing
       if (answer.revealed === undefined) answer.revealed = false;
 
-      // Always show answer text
       answerText.textContent = answer.answer;
-
-      // Show points only if revealed
       answerPoints.textContent = answer.revealed ? answer.points : '';
 
-      // Toggle revealed class and reveal button visibility
       if (answer.revealed) {
         box.classList.add('revealed');
         revealBtn.style.display = 'none';
@@ -47,17 +74,12 @@ function displayQuestion(index) {
   document.getElementById('currentQuestionIndex').textContent = `Question ${index + 1} of ${questions.length}`;
 }
 
-
-
-
-
-
-
 function revealAnswer(index) {
   const question = questions[currentQuestionIndex];
   if (question.answers && question.answers[index]) {
     question.answers[index].revealed = true;
     displayQuestion(currentQuestionIndex);
+    emitGameState();
   }
 }
 
@@ -65,12 +87,14 @@ function revealAllAnswers() {
   const question = questions[currentQuestionIndex];
   question.answers.forEach(answer => answer.revealed = true);
   displayQuestion(currentQuestionIndex);
+  emitGameState();
 }
 
 function hideAllAnswers() {
   const question = questions[currentQuestionIndex];
   question.answers.forEach(answer => answer.revealed = false);
   displayQuestion(currentQuestionIndex);
+  emitGameState();
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -83,19 +107,21 @@ document.addEventListener('DOMContentLoaded', async () => {
       alert('No questions found');
       return;
     }
-
+socket.on('connect', () => {
+  alert(`Connected to server with ID: ${socket.id}`);
+});
     displayQuestion(0);
+    emitGameState();
 
-    // Add event listeners to reveal buttons inside answer boxes
     document.querySelectorAll('.answer-box').forEach((box, index) => {
       const btn = box.querySelector('.reveal-btn');
       btn.addEventListener('click', () => revealAnswer(index));
     });
 
-    // Navigation buttons
     document.getElementById('nextQuestionBtn').addEventListener('click', () => {
       if (currentQuestionIndex < questions.length - 1) {
         displayQuestion(currentQuestionIndex + 1);
+        emitGameState();
       } else {
         alert('No more questions available.');
       }
@@ -104,16 +130,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('prevQuestionBtn').addEventListener('click', () => {
       if (currentQuestionIndex > 0) {
         displayQuestion(currentQuestionIndex - 1);
+        emitGameState();
       } else {
         alert('This is the first question.');
       }
     });
 
-    // Reveal all / Hide all buttons
     document.getElementById('revealAllBtn').addEventListener('click', revealAllAnswers);
     document.getElementById('hideAllBtn').addEventListener('click', hideAllAnswers);
 
-    // Wrong X button (example)
     document.getElementById('wrongXBtn').addEventListener('click', () => {
       const overlay = document.createElement('div');
       overlay.id = 'largeXOverlay';
@@ -135,19 +160,21 @@ document.addEventListener('DOMContentLoaded', async () => {
       setTimeout(() => {
         document.body.removeChild(overlay);
       }, 3000);
+      // You can emit a gameState update here if needed
     });
 
-    // Points buttons
     document.getElementById('addPointsTeam1').addEventListener('click', () => {
       const pointsToAdd = parseInt(document.getElementById('pointsToAdd').value) || 0;
-      const team1Points = document.getElementById('team1Points');
-      team1Points.textContent = (parseInt(team1Points.textContent) || 0) + pointsToAdd;
+      const team1PointsElem = document.getElementById('team1Points');
+      team1PointsElem.textContent = (parseInt(team1PointsElem.textContent) || 0) + pointsToAdd;
+      emitGameState();
     });
 
     document.getElementById('addPointsTeam2').addEventListener('click', () => {
       const pointsToAdd = parseInt(document.getElementById('pointsToAdd').value) || 0;
-      const team2Points = document.getElementById('team2Points');
-      team2Points.textContent = (parseInt(team2Points.textContent) || 0) + pointsToAdd;
+      const team2PointsElem = document.getElementById('team2Points');
+      team2PointsElem.textContent = (parseInt(team2PointsElem.textContent) || 0) + pointsToAdd;
+      emitGameState();
     });
 
   } catch (error) {

@@ -1,170 +1,94 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Family Feud Game</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .answer-box {
-            background: #333;
-            border: 2px solid #fff;
-            color: #fff;
-            font-size: 1.5rem;
-            font-weight: bold;
-            text-align: center;
-            padding: 20px;
-            margin: 10px;
-            min-height: 80px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background-color 0.3s;
-        }
-        .answer-box.revealed {
-            background: #4CAF50;
-            transform: scale(1.05);
-        }
-        .answer-box.hidden::before {
-            content: "????";
-            font-size: 2rem;
-        }
-        .wrong-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 0, 0, 0.9);
-            color: #fff;
-            font-size: 5rem;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.5s;
-        }
-        .wrong-overlay.active {
-            opacity: 1;
-            pointer-events: all;
-        }
-        .wrong-overlay::before {
-            content: "✗";
-            animation: shake 0.5s;
-        }
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-10px); }
-            50% { transform: translateX(10px); }
-            75% { transform: translateX(-10px); }
-        }
-        body {
-            font-family: 'Arial', sans-serif;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Family Feud Game</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .answer-box {
+      background: #333;
+      border: 2px solid #fff;
+      color: #fff;
+      font-size: 1.5rem;
+      font-weight: bold;
+      text-align: center;
+      padding: 20px;
+      margin: 10px;
+      min-height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.3s;
+    }
+    .answer-box.revealed {
+      background: #4caf50;
+      transform: scale(1.05);
+    }
+    .wrong-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 0, 0, 0.9);
+      color: #fff;
+      font-size: 5rem;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s;
+      z-index: 1000;
+    }
+    .wrong-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+    body {
+      font-family: 'Arial', sans-serif;
+    }
+  </style>
 </head>
 <body class="bg-gradient-to-b from-blue-500 to-purple-600 min-h-screen flex flex-col items-center justify-center p-4">
-    <div id="wrong-overlay" class="wrong-overlay">INCORRECT</div>
+  <div id="wrong-overlay" class="wrong-overlay">INCORRECT</div>
 
-    <div class="w-full max-w-4xl bg-black bg-opacity-70 rounded-lg shadow-2xl p-6">
-        <!-- Teams and Points -->
-        <div class="flex justify-between mb-6">
-            <div class="text-center">
-                <h2 class="text-white text-2xl font-bold mb-2">Team A</h2>
-                <div class="text-yellow-400 text-3xl font-bold" id="team-a-points">0</div>
-            </div>
-            <div class="text-center">
-                <h2 class="text-white text-2xl font-bold mb-2">Team B</h2>
-                <div class="text-yellow-400 text-3xl font-bold" id="team-b-points">0</div>
-            </div>
-        </div>
-
-        <!-- Question -->
-        <div class="bg-blue-800 rounded-lg p-4 mb-6">
-            <h1 class="text-white text-xl text-center" id="question">Name something you bring on a camping trip</h1>
-        </div>
-
-        <!-- Answers Boxes -->
-        <div class="flex gap-4">
-            <!-- Left side: first 3 answers -->
-            <div class="flex-1">
-                <div class="answer-box" id="answer-0"></div>
-                <div class="answer-box" id="answer-1"></div>
-                <div class="answer-box" id="answer-2"></div>
-            </div>
-            <!-- Right side: next 3 answers -->
-            <div class="flex-1">
-                <div class="answer-box" id="answer-3"></div>
-                <div class="answer-box" id="answer-4"></div>
-                <div class="answer-box" id="answer-5"></div>
-            </div>
-        </div>
-
-        </div>
+  <div class="w-full max-w-4xl bg-black bg-opacity-70 rounded-lg shadow-2xl p-6">
+    <!-- Teams and Points -->
+    <div class="flex justify-between mb-6">
+      <div class="text-center">
+        <h2 class="text-white text-2xl font-bold mb-2" id="team1-name">Team A</h2>
+        <div class="text-yellow-400 text-3xl font-bold" id="team-a-points">0</div>
+      </div>
+      <div class="text-center">
+        <h2 class="text-white text-2xl font-bold mb-2" id="team2-name">Team B</h2>
+        <div class="text-yellow-400 text-3xl font-bold" id="team-b-points">0</div>
+      </div>
     </div>
 
-    
-    <script>
-        // Sample data (in a real app, this could be fetched from API)
-        const question = "Name something you bring on a camping trip";
-        const answers = [
-            { answer: "Tent", points: 35 },
-            { answer: "Sleeping Bag", points: 25 },
-            { answer: "Flashlight", points: 15 },
-            { answer: "Food", points: 10 },
-            { answer: "Matches", points: 8 },
-            { answer: "Water", points: 7 }
-        ];
+    <!-- Question -->
+    <div class="bg-blue-800 rounded-lg p-4 mb-6">
+      <h1 class="text-white text-xl text-center" id="question">Loading question...</h1>
+    </div>
 
-        let revealedCount = 0;
-        let teamAPoints = 0;
-        let teamBPoints = 0;
+    <!-- Answers Boxes -->
+    <div class="flex gap-4">
+      <div class="flex-1">
+        <div class="answer-box" id="answer-0"></div>
+        <div class="answer-box" id="answer-1"></div>
+        <div class="answer-box" id="answer-2"></div>
+      </div>
+      <div class="flex-1">
+        <div class="answer-box" id="answer-3"></div>
+        <div class="answer-box" id="answer-4"></div>
+        <div class="answer-box" id="answer-5"></div>
+      </div>
+    </div>
+  </div>
 
-        document.getElementById('question').textContent = question;
-
-        // Reveal next answer on button click or specific key (e.g., spacebar)
-        document.getElementById('reveal-btn').addEventListener('click', revealNext);
-        document.addEventListener('keydown', (e) => {
-            if (e.code === 'Space') {
-                e.preventDefault();
-                revealNext();
-            }
-        });
-
-        function revealNext() {
-            if (revealedCount < answers.length) {
-                const box = document.getElementById(`answer-${revealedCount}`);
-                box.textContent = `${answers[revealedCount].answer} - ${answers[revealedCount].points}`;
-                box.classList.add('revealed');
-                // Award points to selected team
-                const team = parseInt(document.getElementById('team-select').value);
-                if (team === 1) {
-                    teamAPoints += answers[revealedCount].points;
-                    document.getElementById('team-a-points').textContent = teamAPoints;
-                } else if (team === 2) {
-                    teamBPoints += answers[revealedCount].points;
-                    document.getElementById('team-b-points').textContent = teamBPoints;
-                }
-                revealedCount++;
-            }
-        }
-
-        // Wrong answer function: shows red X overlay
-        document.getElementById('wrong-btn').addEventListener('click', isWrong);
-        function isWrong() {
-            const overlay = document.getElementById('wrong-overlay');
-            overlay.classList.add('active');
-            setTimeout(() => {
-                overlay.classList.remove('active');
-            }, 2000); // Hide after 2 seconds
-        }
-    </script>
+  <script src="http://localhost:4000/socket.io/socket.io.js"></script>
+  <script src="/public/js/gamescreen.js"></script>
 </body>
-
-    <script src="/js/gamescreen.js"></script>
-
 </html>
-</content>
-</create_file>

@@ -1,6 +1,6 @@
-// socketHandlers.js
-import fetch from 'node-fetch'; 
+// sockethandlers.js
 import dotenv from 'dotenv';
+import Question from '../../models/question.js'; // ✅ adjust path to your Question model
 dotenv.config();
 
 let questions = [];
@@ -16,22 +16,18 @@ let gameState = {
   }
 };
 
-// 🔹 Load questions from API
+// 🔹 Load questions directly from MongoDB instead of hitting API
 async function loadQuestions() {
   try {
-    const baseUrl = process.env.API_URL || 'http://localhost:3000'; // fallback
-    const response = await fetch(`${baseUrl}/api/questions`);
-    if (!response.ok) throw new Error(`Failed to fetch questions: ${response.status}`);
-
-    questions = await response.json();
-
+    questions = await Question.find({});
     if (questions.length > 0) {
       setCurrentQuestion(0);
+      console.log(`✅ Loaded ${questions.length} questions from DB`);
     } else {
       console.warn('⚠️ No questions found in the database');
     }
   } catch (error) {
-    console.error('Error loading questions:', error);
+    console.error('❌ Error loading questions from DB:', error);
   }
 }
 
@@ -51,6 +47,7 @@ export default function registerSocketHandlers(io) {
   io.on('connection', (socket) => {
     console.log('✅ User connected:', socket.id);
 
+    // Send current game state immediately
     socket.emit('gameState', gameState);
 
     socket.on('revealAnswer', (index) => {
@@ -106,4 +103,5 @@ export default function registerSocketHandlers(io) {
   });
 }
 
+// 🔹 Load questions once on startup
 loadQuestions().catch(console.error);
