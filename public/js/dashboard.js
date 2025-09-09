@@ -186,7 +186,6 @@ document.getElementById('startGameBtn').addEventListener('click', () => {
   window.open(controllerUrl, 'Controller', 'width=800,height=600');
   window.open(gameScreenUrl, 'GameScreen', 'width=800,height=600');
   
-  alert('Game started! Game screen and controller are now open.');
 
   // Optionally, you can redirect to a specific page or perform other actions
   // window.location.href = '/some-other-page';

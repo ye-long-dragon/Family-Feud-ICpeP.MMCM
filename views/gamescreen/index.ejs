@@ -6,25 +6,36 @@
   <title>Family Feud Game</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    .answer-box {
-      background: #333;
-      border: 2px solid #fff;
-      color: #fff;
-      font-size: 1.5rem;
-      font-weight: bold;
-      text-align: center;
-      padding: 20px;
-      margin: 10px;
-      min-height: 80px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background-color 0.3s;
-    }
-    .answer-box.revealed {
-      background: #4caf50;
-      transform: scale(1.05);
-    }
+ .answer-box {
+  background: #333;
+  border: 2px solid #fff;
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-align: center;
+  padding: 20px;
+  margin: 10px;
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.answer-box.revealed {
+  background: #4caf50;
+  color: black;
+  transform: scale(1.05);
+}
+
+.answer-box.answer-hidden {
+  background: #777;      /* gray background */
+  color: #ccc;           /* light gray text */
+  font-style: italic;
+}
+
+
+    
     .wrong-overlay {
       position: fixed;
       top: 0;
@@ -50,13 +61,8 @@
     body {
       font-family: 'Arial', sans-serif;
     }
-    .revealed {
-  color: black;
-  font-weight: bold;
-}
-.hidden {
-  color: transparent; /* or use display:none if you prefer */
-}
+    
+
   </style>
 </head>
 <body class="bg-gradient-to-b from-blue-500 to-purple-600 min-h-screen flex flex-col items-center justify-center p-4">
@@ -97,5 +103,8 @@
 
   <script src="http://localhost:4000/socket.io/socket.io.js"></script>
   <script src="/js/gamescreen.js"></script>
+  <audio id="correctSound" src="/audio/correct.mp3" preload="auto"></audio>
+<audio id="wrongSound" src="/audio/wrong.mp3" preload="auto"></audio>
+
 </body>
 </html>

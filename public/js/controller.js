@@ -5,32 +5,25 @@ let questions = [];
 let answers = [];
 let answerStatus = []; // Track revealed status of answers
 let currentQuestionIndex = 0;
-let showX = false;  // Track showX locally
+let showX = 0;  // Track showX locally
 
 // Listen for full game state updates from server
 socket.on('gameState', (state) => {
-  // Update local state from server
   questions = state.questions || questions;
   currentQuestionIndex = state.currentQuestionIndex ?? currentQuestionIndex;
-  showX = !!state.showX;
-
-  // If you want to keep separate answers and answerStatus arrays, update them here:
-  answers = questions.map(q => q.answers || []);
-  // answerStatus can be derived from answers' revealed flags, so usually not needed separately
+  showX = Number(state.showX) || 0;  // now an integer >= 0
 
   // Update points display
   document.getElementById('team1Points').textContent = state.team1Points ?? document.getElementById('team1Points').textContent;
   document.getElementById('team2Points').textContent = state.team2Points ?? document.getElementById('team2Points').textContent;
 
-  // ShowX overlay if needed
-  if (showX) {
-    showXOverlay();
+  // Show X overlay(s) if needed
+  if (showX > 0) {
+    showXOverlay(showX);
   }
 
-  // Display current question and answers
   displayQuestion(currentQuestionIndex);
 
-  // Update game state info display
   updateGameStateInfo({
     showX,
     questions,
@@ -39,7 +32,8 @@ socket.on('gameState', (state) => {
 });
 
 
-function showXOverlay() {
+
+function showXOverlay(count) {
   const overlay = document.createElement('div');
   overlay.id = 'largeXOverlay';
   overlay.style.position = 'fixed';
@@ -55,12 +49,13 @@ function showXOverlay() {
   overlay.style.justifyContent = 'center';
   overlay.style.alignItems = 'center';
   overlay.style.zIndex = 1050;
-  overlay.textContent = 'X';
+  overlay.textContent = 'X'.repeat(count);  // show multiple X's
   document.body.appendChild(overlay);
   setTimeout(() => {
     document.body.removeChild(overlay);
   }, 3000);
 }
+
 
 function updateGameStateInfo(state) {
   const infoDiv = document.getElementById('gameStateInfo');
@@ -80,8 +75,9 @@ function updateGameStateInfo(state) {
     }
   }
 
-  infoDiv.textContent = `Show X: ${state.showX ? 'Yes' : 'No'} | Answers: ${answersStatus}`;
+  infoDiv.textContent = `Show X count: ${state.showX} | Answers: ${answersStatus}`;
 }
+
 
 function displayQuestion(index) {
   if (index < 0 || index >= questions.length) {
@@ -157,12 +153,13 @@ function hideAllAnswers() {
 function emitGameState() {
   socket.emit('gameState', {
     questions,
-    showX,
+    showX: showX || 0,
     currentQuestionIndex,
     team1Points: parseInt(document.getElementById('team1Points').textContent) || 0,
     team2Points: parseInt(document.getElementById('team2Points').textContent) || 0,
   });
 }
+
 
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -211,30 +208,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('revealAllBtn').addEventListener('click', revealAllAnswers);
     document.getElementById('hideAllBtn').addEventListener('click', hideAllAnswers);
 
-    document.getElementById('wrongXBtn').addEventListener('click', () => {
-      const overlay = document.createElement('div');
-      overlay.id = 'largeXOverlay';
-      overlay.style.position = 'fixed';
-      overlay.style.top = 0;
-      overlay.style.left = 0;
-      overlay.style.width = '100vw';
-      overlay.style.height = '100vh';
-      overlay.style.backgroundColor = 'rgba(255,0,0,0.9)';
-      overlay.style.color = 'white';
-      overlay.style.fontSize = '20vh';
-      overlay.style.fontWeight = 'bold';
-      overlay.style.display = 'flex';
-      overlay.style.justifyContent = 'center';
-      overlay.style.alignItems = 'center';
-      overlay.style.zIndex = 1050;
-      overlay.textContent = 'X';
-      document.body.appendChild(overlay);
-      setTimeout(() => {
-        document.body.removeChild(overlay);
-      }, 3000);
-      // Emit gameState update with showX true
-      socket.emit('gameState', { showX: true });
-    });
+   document.getElementById('wrongXBtn').addEventListener('click', () => {
+  showX = (showX || 0) + 1;  // increment showX count
+  showXOverlay(showX);
+
+  // Emit updated game state with new showX count
+  socket.emit('gameState', {
+    questions,
+    showX,
+    currentQuestionIndex,
+    team1Points: parseInt(document.getElementById('team1Points').textContent) || 0,
+    team2Points: parseInt(document.getElementById('team2Points').textContent) || 0,
+  });
+});
+
 
     document.getElementById('addPointsTeam1').addEventListener('click', () => {
       const pointsToAdd = parseInt(document.getElementById('pointsToAdd').value) || 0;
