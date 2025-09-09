@@ -4,6 +4,8 @@ let questions = [];
 let currentQuestionIndex = 0;
 let team1Points = 0;
 let team2Points = 0;
+let team1Name = 'Team A';  // default names matching your EJS initial text
+let team2Name = 'Team B';
 let showX = 0;  // Initialize showX to 0
 
 socket.on('gameState', (gameState) => {
@@ -12,13 +14,21 @@ socket.on('gameState', (gameState) => {
   team1Points = gameState.team1Points ?? 0;
   team2Points = gameState.team2Points ?? 0;
 
+  // Update team names if provided
+  if (gameState.team1Name) {
+    team1Name = gameState.team1Name;
+  }
+  if (gameState.team2Name) {
+    team2Name = gameState.team2Name;
+  }
+
   // Check if showX changed
-  const newShowX = gameState.showX ?? 0;
+  let newShowX = gameState.showX ?? 0;
   if (newShowX !== showX) {
     if (newShowX > 0) {
       showXOverlay(newShowX);
       if (newShowX > 3) {
-        newShowX=0;
+        newShowX = 0;
       }
     }
     showX = newShowX;
@@ -31,6 +41,10 @@ function updateUI() {
   // Update team points
   document.getElementById('team-a-points').textContent = team1Points;
   document.getElementById('team-b-points').textContent = team2Points;
+
+  // Update team names (match your EJS IDs)
+  document.getElementById('team1-name').textContent = team1Name;
+  document.getElementById('team2-name').textContent = team2Name;
 
   // Update question text
   const currentQuestion = questions[currentQuestionIndex];
@@ -54,7 +68,7 @@ function updateUI() {
   }
 }
 
-// Example showXOverlay function that shows 'X' count times for 3 seconds
+// showXOverlay function that shows 'X' count times for 3 seconds
 function showXOverlay(count) {
   const overlay = document.createElement('div');
   overlay.id = 'largeXOverlay';
